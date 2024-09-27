@@ -22,3 +22,9 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+InputForm.jsx
+InputList.jsx
+InputManager.jsx
+TaskForm.jsx
+TaskList.jsx
+TaskManager.jsx
