@@ -1,16 +1,5 @@
 # React CRUD Application Documentation
 
-# React Vite
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react/README.md) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-
-
-
 ## Overview
 
 This application is a simple CRUD (Create, Read, Update, Delete) task manager built with React. It allows users to add, view, edit, and delete tasks. Each task has an id, name, email, and phone number associated with it.
@@ -19,24 +8,26 @@ This application is a simple CRUD (Create, Read, Update, Delete) task manager bu
 
 The application is composed of three main components:
 
-1. TaskManager
-2. TaskForm
-3. TaskList
+1. CrudManager
+2. CrudForm
+3. CrudList
 
-### TaskManager Component
+### CrudManager Component
 
-File: `TaskManager.jsx`
+File: CrudManager.jsx
 
 This is the main component that orchestrates the entire application.
 
 ```jsx
 import React, { useState } from 'react';
-import TaskForm from "./TaskForm.jsx";
-import TaskList from "./TaskList.jsx";
+import CrudForm from "./CrudForm.jsx";
+import CrudList from "./CrudList.jsx";
+import { toast } from "react-toastify";
+import uuid4 from "uuid4";
 
-const TaskManager = () => {
-    const [tasks, setTasks] = useState([]);
-    const [editingTask, setEditingTask] = useState(null);
+const CrudManager = () => {
+    const [crudTasks, setCrudTasks] = useState([]);
+    const [crudEditing, setCrudEditing] = useState(null);
 
     // ... (function definitions)
 
@@ -46,15 +37,14 @@ const TaskManager = () => {
                 Welcome to my Crud App
             </h1>
             <div className="w-[1200px] bg-slate-500">
-                <TaskForm 
-                    onSubmit={editingTask ? updateTask : addTask} 
-                    initialData={editingTask}
-                    key={editingTask ? editingTask.id : 'new'}
+                <CrudForm 
+                    onSubmit={crudEditing ? crudUpdate : addCrud} 
+                    initialData={crudEditing}
                 />
-                <TaskList 
-                    tasks={tasks} 
-                    onDelete={deleteTask} 
-                    onEdit={editTask}
+                <CrudList 
+                    crudTasks={crudTasks} 
+                    CrudDelete={CrudDelete} 
+                    crudEdit={crudEdit}
                 />
             </div>
         </div>
@@ -63,73 +53,78 @@ const TaskManager = () => {
 ```
 
 #### State:
-- `tasks`: An array that holds all the tasks.
-- `editingTask`: Holds the task currently being edited, or null if no task is being edited.
+- `crudTasks`: An array that holds all the tasks.
+- `crudEditing`: Holds the task currently being edited, or null if no task is being edited.
 
 #### Functions:
-1. `addTask(task)`: Adds a new task to the `tasks` array.
-   ```javascript
-   const addTask = (task) => {
-       setTasks([...tasks, { ...task, id: Date.now() }]);
-   };
-   ```
+- `addCrud(crudTask)`: Adds a new task to the crudTasks array.
 
-2. `updateTask(updatedTask)`: Updates an existing task in the `tasks` array.
-   ```javascript
-   const updateTask = (updatedTask) => {
-       const newTasks = tasks.map((task) => 
-           task.id === updatedTask.id ? updatedTask : task
-       );
-       setTasks(newTasks);
-       setEditingTask(null);
-   };
-   ```
+```javascript
+const addCrud = (crudTask) => {
+    setCrudTasks([...crudTasks, { ...crudTask, id: uuid4() }]);
+    toast.success("Successfully Added Data");
+};
+```
 
-3. `deleteTask(id)`: Removes a task from the `tasks` array based on its id.
-   ```javascript
-   const deleteTask = (id) => {
-       const newTasks = tasks.filter((task) => task.id !== id);
-       setTasks(newTasks);
-   };
-   ```
+- `crudUpdate(crudUpdate)`: Updates an existing task in the crudTasks array.
 
-4. `editTask(task)`: Sets the `editingTask` state to the task being edited.
-   ```javascript
-   const editTask = (task) => {
-       setEditingTask(task);
-   };
-   ```
+```javascript
+const crudUpdate = (crudUpdate) => {
+    setCrudTasks(crudTasks.map((task) => 
+        task.id === crudUpdate.id ? crudUpdate : task
+    ));
+    setCrudEditing(null);
+    toast.info("Successfully Update Data");
+};
+```
 
-### TaskForm Component
+- `CrudDelete(id)`: Removes a task from the crudTasks array based on its id.
 
-File: `TaskForm.jsx`
+```javascript
+const CrudDelete = (id) => {
+    setCrudTasks(crudTasks.filter((task) => task.id !== id));
+    toast.error("Successfully Delete Data");
+};
+```
+
+- `crudEdit(task)`: Sets the crudEditing state to the task being edited.
+
+```javascript
+const crudEdit = (task) => {
+    setCrudEditing(task);
+};
+```
+
+### CrudForm Component
+
+File: CrudForm.jsx
 
 This component renders a form for adding new tasks or editing existing ones.
 
 Key props:
-- `onSubmit`: Function to call when the form is submitted (either `addTask` or `updateTask`).
+- `onSubmit`: Function to call when the form is submitted (either addCrud or crudUpdate).
 - `initialData`: Data of the task being edited (if any).
 
-### TaskList Component
+### CrudList Component
 
-File: `TaskList.jsx`
+File: CrudList.jsx
 
 This component renders the list of all tasks and provides options to edit or delete each task.
 
 Key props:
-- `tasks`: Array of all tasks to display.
-- `onDelete`: Function to call when deleting a task.
-- `onEdit`: Function to call when editing a task.
+- `crudTasks`: Array of all tasks to display.
+- `CrudDelete`: Function to call when deleting a task.
+- `crudEdit`: Function to call when editing a task.
 
 ## Workflow
 
-1. When the application loads, the TaskManager component initializes with an empty tasks array.
-2. The TaskForm allows users to input new task details.
-3. When a new task is submitted, the `addTask` function is called, which updates the `tasks` state.
-4. The TaskList component re-renders to display the new task.
-5. To edit a task, the user clicks an edit button, which calls `editTask` and populates the form with the task's current data.
-6. When the edit form is submitted, `updateTask` is called to modify the existing task.
-7. To delete a task, the user clicks a delete button, which calls `deleteTask` to remove the task from the array.
+1. When the application loads, the CrudManager component initializes with an empty crudTasks array.
+2. The CrudForm allows users to input new task details (name, email, phone).
+3. When a new task is submitted, the addCrud function is called, which updates the crudTasks state.
+4. The CrudList component re-renders to display the new task.
+5. To edit a task, the user clicks an edit button, which calls crudEdit and populates the form with the task's current data.
+6. When the edit form is submitted, crudUpdate is called to modify the existing task.
+7. To delete a task, the user clicks a delete button, which calls CrudDelete to remove the task from the array.
 
 ## Styling
 
@@ -138,10 +133,19 @@ The application uses Tailwind CSS for styling. Key classes:
 - `text-white`: White text color
 - `w-[1200px]`: Sets a fixed width for the task container
 
+## Dependencies
+
+- React
+- uuid4 (for generating unique IDs)
+- react-toastify (for toast notifications)
+- Tailwind CSS (for styling)
+
 ## Potential Improvements
 
-1. Add form validation for email and phone fields.
-2. Implement data persistence using local storage or a backend API.
-3. Add sorting and filtering functionality to the task list.
-4. Improve error handling and user feedback.
-5. Implement pagination or infinite scrolling for large numbers of tasks.
+1. Implement data persistence using local storage or a backend API.
+2. Add sorting and filtering functionality to the task list.
+3. Implement pagination or infinite scrolling for large numbers of tasks.
+4. Enhance form validation and error handling.
+5. Add unit and integration tests for better code reliability.
+6. Implement a search functionality to find specific tasks quickly.
+7. Add a confirmation dialog before deleting tasks to prevent accidental deletions.
